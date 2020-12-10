@@ -23,7 +23,7 @@
 </template>
 
 <script>
-import { getArticle } from '@/api/article'
+import { getArticles } from '@/api/article'
 import ArticleItem from '@/components/article-item'
 
 export default {
@@ -53,7 +53,7 @@ export default {
   mounted () {},
   methods: {
     async onLoad () {
-      const { data } = await getArticle({
+      const { data } = await getArticles({
         channel_id: this.channel.id,
         timestamp: this.timestamp || Date.now(),
         with_top: 1
@@ -69,7 +69,7 @@ export default {
     },
 
     async onRefresh () {
-      const { data } = await getArticle({
+      const { data } = await getArticles({
         channel_id: this.channel.id,
         timestamp: Date.now(),
         with_top: 1
