@@ -7,35 +7,47 @@
       left-arrow
       @click-left="$router.back()"
     />
-    <h1 class="title">{{ article.title }}</h1>
-    <van-cell center class="user-info">
-      <div slot="title" class="name">{{ article.aut_name }}</div>
-      <van-image
-        slot="icon"
-        class="avatar"
-        round
-        fit="cover"
-        :src="article.aut_photo"
+    <!-- 文章内容 -->
+    <div class="article-wrap">
+      <h1 class="title">{{ article.title }}</h1>
+      <van-cell center class="user-info">
+        <div slot="title" class="name">{{ article.aut_name }}</div>
+        <van-image
+          slot="icon"
+          class="avatar"
+          round
+          fit="cover"
+          :src="article.aut_photo"
+        />
+        <div slot="label" class="pubdate">
+          {{ article.pubdate | relativeTime }}
+        </div>
+        <van-button
+          class="follow-btn"
+          :type="article.is_followed ? 'default' : 'info'"
+          :icon="article.is_followed ? '' : 'plus'"
+          round
+          size="small"
+          :loading="isFollowLoading"
+          @click="onFollow"
+          >{{ article.is_followed ? "已关注" : "关注" }}</van-button
+        >
+      </van-cell>
+      <div
+        ref="article-content"
+        class="content markdown-body"
+        v-html="article.content"
+      ></div>
+      <!-- 文章评论 -->
+      <van-cell title="全部评论"></van-cell>
+      <comment-list
+        :list="CommentList"
+        :source="articleId"
+        @update-total-count="totalCommentCount = $event"
+        @reply-click="onReplyClick"
       />
-      <div slot="label" class="pubdate">
-        {{ article.pubdate | relativeTime }}
-      </div>
-      <van-button
-        class="follow-btn"
-        :type="article.is_followed ? 'default' : 'info'"
-        :icon="article.is_followed ? '' : 'plus'"
-        round
-        size="small"
-        :loading="isFollowLoading"
-        @click="onFollow"
-        >{{ article.is_followed ? "已关注" : "关注" }}</van-button
-      >
-    </van-cell>
-    <div
-      ref="article-content"
-      class="content markdown-body"
-      v-html="article.content"
-    ></div>
+    </div>
+
     <!-- 底部区域 -->
     <div class="article-bottom">
       <van-button
@@ -59,6 +71,19 @@
       />
       <van-icon name="share" color="#777777"></van-icon>
     </div>
+    <!-- 发布评论 -->
+    <van-popup v-model="isPostShow" position="bottom">
+      <post-comment :target="articleId" @post-success="onPostSuccess" />
+    </van-popup>
+    <!-- 评论回复 -->
+    <van-popup v-model="isReplyShow" position="bottom">
+      <comment-reply
+        v-if="isReplyShow"
+        :comment="replyComment"
+        :article-id="articleId"
+        @close="isReplyShow = false"
+      />
+    </van-popup>
   </div>
 </template>
 
@@ -73,10 +98,17 @@ import {
 } from '@/api/article'
 import { ImagePreview } from 'vant'
 import { addFollow, deleteFollow } from '@/api/user'
+import CommentList from './components/comment-list'
+import PostComment from './components/post-comment.vue'
+import CommentReply from './components/comment-reply.vue'
 
 export default {
   name: 'ArticleIndex',
-  components: {},
+  components: {
+    CommentList,
+    PostComment,
+    CommentReply
+  },
   props: {
     articleId: {
       type: [String, Number, Object],
@@ -87,7 +119,11 @@ export default {
     return {
       article: {},
       isFollowLoading: false,
-      totalCommentCount: 0
+      totalCommentCount: 0,
+      isPostShow: false,
+      CommentList: [],
+      isReplyShow: false,
+      replyComment: {}
     }
   },
   computed: {},
@@ -158,12 +194,31 @@ export default {
         this.article.attitude = 1
       }
       this.$toast.success(`${this.article.attitude === 1 ? '' : '取消'}收藏成功`)
+    },
+
+    onPostSuccess (comment) {
+      this.CommentList.unshift(comment)
+      this.totalCommentCount++
+      this.isPostShow = false
+    },
+
+    onReplyClick (commit) {
+      this.replyComment = commit
+      this.isReplyShow = true
     }
   }
 }
 </script>
 
 <style scoped lang='less'>
+.article-wrap {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 46px;
+  bottom: 44px;
+  overflow-y: auto;
+}
 .title {
   font-size: 20px;
   color: #3a3a3a;
