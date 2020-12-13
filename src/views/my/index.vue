@@ -10,7 +10,7 @@
           :src="currentUser.photo"
         />
         <div class="name" slot="title">{{ currentUser.name }}</div>
-        <van-button class="update-btn" size="small" round
+        <van-button class="update-btn" size="small" round to="/user/profile"
           >编辑资料</van-button
         ></van-cell
       >
