@@ -1,7 +1,7 @@
 <template>
   <div class="layout-container">
     <!-- 路由出口 -->
-    <router-view></router-view>
+    <router-view />
     <!-- 底部导航栏 -->
     <van-tabbar v-model="active" route>
       <van-tabbar-item icon="home-o" to="/">首页</van-tabbar-item>
