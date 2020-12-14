@@ -17,12 +17,12 @@ export default new Vuex.Store({
       setItem(USER_KEY, data)
     },
 
-    addCachePages (state, pageName) {
+    addCachePage (state, pageName) {
       if (!state.cachePages.includes(pageName)) {
         state.cachePages.push(pageName)
       }
     },
-    removeCachePages (state, pageName) {
+    removeCachePage (state, pageName) {
       const index = state.cachePages.indexOf(pageName)
       if (index !== -1) {
         state.cachePages.splice(index, 1)
