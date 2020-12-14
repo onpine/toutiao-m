@@ -1,5 +1,5 @@
 <template>
-  <div class="article-list">
+  <div class="article-list" ref="article-list">
     <van-pull-refresh
       v-model="isRefreshLoading"
       @refresh="onRefresh"
@@ -25,6 +25,7 @@
 <script>
 import { getArticles } from '@/api/article'
 import ArticleItem from '@/components/article-item'
+import { debounce } from 'lodash'
 
 export default {
   name: 'ArticleList',
@@ -44,13 +45,27 @@ export default {
       finished: false,
       timestamp: null,
       isRefreshLoading: false,
-      refreshSuccessText: ''
+      refreshSuccessText: '',
+      scrollTop: 0
     }
   },
   computed: {},
   watch: {},
   created () {},
-  mounted () {},
+  mounted () {
+    const articleList = this.$refs['article-list']
+    articleList.onscroll = debounce(() => {
+      this.scrollTop = articleList.scrollTop
+    }, 50)
+  },
+  // 从缓存中激活
+  activated () {
+    this.$refs['article-list'].scrollTop = this.scrollTop
+  },
+  // 组件失去活动
+  deactivated () {
+
+  },
   methods: {
     async onLoad () {
       const { data } = await getArticles({
